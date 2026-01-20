@@ -29,12 +29,14 @@ export default function Header() {
     }
   }, [isMenuOpen]);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleMenu = () => {
+    setIsMenuOpen(prev => !prev);
+  };
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white shadow-lg' : 'bg-white/95 backdrop-blur-sm'
+        isScrolled ? 'bg-white shadow-lg' : 'bg-white shadow-md'
       }`}
     >
       {/* Top Bar - Hidden on mobile */}
@@ -123,26 +125,30 @@ export default function Header() {
       </nav>
 
       {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="lg:hidden fixed inset-0 top-[72px] bg-white z-40 mobile-menu-enter">
-          <div className="h-full overflow-y-auto">
-            <ul className="py-4">
-              {navigationLinks.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    onClick={toggleMenu}
-                    className={`block px-6 py-4 font-medium transition-all ${
-                      pathname === link.href
-                        ? 'text-primary-600 bg-primary-50 border-l-4 border-primary-600'
-                        : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+      <div 
+        className={`lg:hidden fixed inset-0 top-[72px] bg-white z-40 transition-transform duration-200 ease-out ${
+          isMenuOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        style={{ willChange: isMenuOpen ? 'transform' : 'auto' }}
+      >
+        <div className="h-full overflow-y-auto">
+          <ul className="py-4">
+            {navigationLinks.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  onClick={toggleMenu}
+                  className={`block px-6 py-4 font-medium transition-colors ${
+                    pathname === link.href
+                      ? 'text-primary-600 bg-primary-50 border-l-4 border-primary-600'
+                      : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
 
             {/* Mobile Contact Info */}
             <div className="border-t border-gray-200 px-6 py-6 space-y-4">
@@ -174,7 +180,6 @@ export default function Header() {
             </div>
           </div>
         </div>
-      )}
     </header>
   );
 }

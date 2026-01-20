@@ -3,6 +3,7 @@ import { Inter, Poppins } from 'next/font/google';
 import './globals.css';
 import { siteConfig } from '@/lib/config';
 import { Toaster } from 'react-hot-toast';
+import FloatingContact from '@/components/FloatingContact';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -80,6 +81,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
       <body className="antialiased">
         {children}
+        <FloatingContact />
         <Toaster
           position="top-right"
           toastOptions={{

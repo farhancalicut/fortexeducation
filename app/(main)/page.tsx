@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -58,6 +58,11 @@ const whyChooseUs = [
 export default function HomePage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loadingTestimonials, setLoadingTestimonials] = useState(true);
+  const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [isAutoScrolling, setIsAutoScrolling] = useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const userInteractionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     fetchTestimonials();
@@ -93,86 +98,163 @@ export default function HomePage() {
       .slice(0, 2);
   };
 
+  const [showFullAbout, setShowFullAbout] = useState(false);
+
+  // Auto-scroll testimonials
+  useEffect(() => {
+    if (!isAutoScrolling || testimonials.length === 0) return;
+
+    autoScrollIntervalRef.current = setInterval(() => {
+      setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
+    }, 3500); // Change every 3.5 seconds
+
+    return () => {
+      if (autoScrollIntervalRef.current) {
+        clearInterval(autoScrollIntervalRef.current);
+      }
+    };
+  }, [isAutoScrolling, testimonials.length]);
+
+  // Scroll to active testimonial
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const cardWidth = scrollContainerRef.current.scrollWidth / testimonials.length;
+      scrollContainerRef.current.scrollTo({
+        left: cardWidth * activeTestimonial,
+        behavior: 'smooth',
+      });
+    }
+  }, [activeTestimonial, testimonials.length]);
+
+  // Handle user interaction - pause auto-scroll
+  const handleUserInteraction = () => {
+    setIsAutoScrolling(false);
+
+    // Clear existing timeout
+    if (userInteractionTimeoutRef.current) {
+      clearTimeout(userInteractionTimeoutRef.current);
+    }
+
+    // Resume auto-scroll after 5 seconds of no interaction
+    userInteractionTimeoutRef.current = setTimeout(() => {
+      setIsAutoScrolling(true);
+    }, 5000);
+  };
+
+  // Handle scroll event to update active dot
+  const handleScroll = () => {
+    if (scrollContainerRef.current && testimonials.length > 0) {
+      const scrollLeft = scrollContainerRef.current.scrollLeft;
+      const cardWidth = scrollContainerRef.current.scrollWidth / testimonials.length;
+      const newActiveIndex = Math.round(scrollLeft / cardWidth);
+      setActiveTestimonial(newActiveIndex);
+    }
+    handleUserInteraction();
+  };
+
   return (
     <div className="overflow-hidden">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-600 text-white">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="container-custom relative z-10 py-16 md:py-24 lg:py-32">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold mb-6 leading-tight">
-                TRUSTED GUIDANCE FOR A BRIGHT FUTURE
-              </h1>
-              <p className="text-lg md:text-xl mb-8 text-primary-50 leading-relaxed">
-                At Fortex Education Consultancy, we are committed to turning students' academic aspirations into reality by providing expert guidance and seamless admission support to top universities and colleges across India.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  href="/booking"
-                  className="inline-flex items-center justify-center bg-white text-primary-600 hover:bg-primary-50 font-semibold py-4 px-8 rounded-lg transition-all shadow-lg hover:shadow-xl"
-                >
-                  Book Free Consultation
-                  <FaArrowRight className="ml-2" />
-                </Link>
-                <Link
-                  href="/career-guidance"
-                  className="inline-flex items-center justify-center border-2 border-white text-white hover:bg-white hover:text-primary-600 font-semibold py-4 px-8 rounded-lg transition-all"
-                >
-                  Explore Careers
-                </Link>
-              </div>
+      <section className="relative bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-600 text-white overflow-hidden min-h-[90vh] flex items-center">
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1)_0%,transparent_50%)]"></div>
+          <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_70%_80%,rgba(255,255,255,0.1)_0%,transparent_50%)]"></div>
+        </div>
+        
+        <div className="container-custom relative z-10 py-16 sm:py-20 w-full">
+          {/* Hero Content - Left Aligned */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="max-w-3xl mb-12 sm:mb-16"
+          >
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-heading font-bold mb-5 sm:mb-7 leading-[1.1] tracking-tight">
+              <span className="text-white">Trusted<br></br> Guidance for a</span>
+              <span className="block mt-2 bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-yellow-200 to-yellow-100">
+                Bright Future
+              </span>
+            </h1>
+            <p className="text-base sm:text-lg lg:text-xl text-primary-50 leading-snug max-w-2xl">
+              Expert guidance for top university admissions across India. Transform your dreams into reality with personalized counseling.
+            </p>
+          </motion.div>
 
-              {/* Trust Badges */}
-              <div className="mt-8 flex flex-wrap items-center gap-6 text-sm">
-                <div className="flex items-center space-x-2">
-                  <FaStar className="text-yellow-400" />
-                  <span>4.9/5 Rating</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <FaCheckCircle className="text-green-400" />
-                  <span>5000+ Students</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <FaTrophy className="text-yellow-400" />
-                  <span>Award Winning</span>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="hidden lg:block"
-            >
-              <div className="relative">
-                <div className="absolute -inset-4 bg-gradient-to-r from-primary-400 to-secondary-400 rounded-2xl opacity-30 blur-xl"></div>
-                <div className="relative bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
-                  <div className="grid grid-cols-2 gap-6">
-                    {stats.map((stat, index) => (
-                      <div
-                        key={index}
-                        className="text-center p-4 bg-white/10 rounded-xl backdrop-blur"
-                      >
-                        <stat.icon className="text-4xl mx-auto mb-2 text-yellow-400" />
-                        <div className="text-3xl font-bold mb-1">
-                          {stat.value}
-                        </div>
-                        <div className="text-sm text-primary-100">
-                          {stat.label}
-                        </div>
+          {/* Infinite Scrolling Stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="mb-10 sm:mb-12"
+          >
+            {/* Scrolling container */}
+            <div className="overflow-x-auto overflow-y-hidden scrollbar-hide">
+              <div className="flex gap-3 sm:gap-6 animate-infinite-scroll hover:animate-none">
+                {/* First set of stats */}
+                {stats.map((stat, index) => (
+                  <div
+                    key={`stat-1-${index}`}
+                    className="flex-shrink-0 w-28 sm:w-48 lg:w-72 bg-white/10 backdrop-blur-lg rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-white/20 shadow-2xl hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-pointer"
+                  >
+                    <div className="flex flex-col sm:flex-row items-center sm:gap-4 mb-2 sm:mb-4">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-white/10 rounded-lg sm:rounded-xl flex items-center justify-center backdrop-blur-sm mb-2 sm:mb-0">
+                        <stat.icon className="text-xl sm:text-2xl lg:text-4xl text-yellow-300 drop-shadow-lg" />
                       </div>
-                    ))}
+                      <div className="text-xl sm:text-2xl lg:text-4xl font-bold text-center sm:text-left">
+                        {stat.value}
+                      </div>
+                    </div>
+                    <div className="text-xs sm:text-sm lg:text-base text-primary-50 font-medium text-center sm:text-left">
+                      {stat.label}
+                    </div>
                   </div>
-                </div>
+                ))}
+                {/* Duplicate set for seamless loop */}
+                {stats.map((stat, index) => (
+                  <div
+                    key={`stat-2-${index}`}
+                    className="flex-shrink-0 w-28 sm:w-48 lg:w-72 bg-white/10 backdrop-blur-lg rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-white/20 shadow-2xl hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-pointer"
+                  >
+                    <div className="flex flex-col sm:flex-row items-center sm:gap-4 mb-2 sm:mb-4">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-white/10 rounded-lg sm:rounded-xl flex items-center justify-center backdrop-blur-sm mb-2 sm:mb-0">
+                        <stat.icon className="text-xl sm:text-2xl lg:text-4xl text-yellow-300 drop-shadow-lg" />
+                      </div>
+                      <div className="text-xl sm:text-2xl lg:text-4xl font-bold text-center sm:text-left">
+                        {stat.value}
+                      </div>
+                    </div>
+                    <div className="text-xs sm:text-sm lg:text-base text-primary-50 font-medium text-center sm:text-left">
+                      {stat.label}
+                    </div>
+                  </div>
+                ))}
               </div>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
+
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="flex flex-col sm:flex-row gap-4 sm:gap-5"
+          >
+            <Link
+              href="/booking"
+              className="group inline-flex items-center justify-center bg-white text-primary-700 hover:bg-yellow-50 font-semibold py-4 px-8 rounded-xl transition-all shadow-xl hover:shadow-2xl text-base sm:text-lg hover:scale-105 duration-300"
+            >
+              Book Free Consultation
+              <FaArrowRight className="ml-3 text-sm group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link
+              href="/career-guidance"
+              className="group inline-flex items-center justify-center bg-white/10 backdrop-blur-md border-2 border-white/30 text-white hover:bg-white/20 font-semibold py-4 px-8 rounded-xl transition-all text-base sm:text-lg hover:scale-105 duration-300"
+            >
+              Explore Careers
+              <FaGlobe className="ml-3 text-sm group-hover:rotate-12 transition-transform" />
+            </Link>
+          </motion.div>
         </div>
 
         {/* Wave Divider */}
@@ -191,35 +273,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section - Mobile */}
-      <section className="lg:hidden bg-gray-50 py-12">
-        <div className="container-custom">
-          <div className="grid grid-cols-2 gap-4">
-            {stats.map((stat, index) => (
-              <div key={index} className="bg-white rounded-xl p-6 text-center shadow-md">
-                <stat.icon className="text-3xl mx-auto mb-2 text-primary-600" />
-                <div className="text-2xl font-bold text-gray-900 mb-1">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-gray-600">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Why Choose Us Section */}
-      <section className="py-16 md:py-24 bg-white">
+      <section className="py-10 sm:py-14 lg:py-20 bg-white">
         <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="section-heading">Why Choose Fortex?</h2>
-            <p className="section-subheading">
-              We are committed to your success with proven expertise and
-              personalized guidance
+          <div className="mb-8 lg:mb-10">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Why Choose Fortex?</h2>
+            <p className="text-sm sm:text-base text-gray-600">
+              Proven expertise and personalized guidance
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             {whyChooseUs.map((item, index) => (
               <motion.div
                 key={index}
@@ -227,15 +291,15 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="card text-center"
+                className="bg-white rounded-xl shadow-md p-5 hover:shadow-lg transition-shadow border border-gray-100"
               >
-                <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <item.icon className="text-3xl text-primary-600" />
+                <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-3">
+                  <item.icon className="text-2xl text-primary-600" />
                 </div>
-                <h3 className="font-heading font-semibold text-xl mb-3 text-gray-900">
+                <h3 className="font-heading font-semibold text-base mb-2 text-gray-900">
                   {item.title}
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-sm text-gray-600 leading-relaxed">
                   {item.description}
                 </p>
               </motion.div>
@@ -245,7 +309,7 @@ export default function HomePage() {
       </section>
 
       {/* About Us Section with Vision & Mission */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-gray-50 to-primary-50">
+      <section className="py-10 sm:py-14 lg:py-20 bg-gradient-to-br from-gray-50 to-primary-50">
         <div className="container-custom">
           <div className="max-w-6xl mx-auto">
             {/* Section Header */}
@@ -253,39 +317,69 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-center mb-16"
+              className="mb-8 lg:mb-12"
             >
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-gray-900 mb-6">
-                About Fortex Education Consultancy
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold text-gray-900 mb-3 sm:mb-4">
+                About Fortex Education
               </h2>
-              <div className="max-w-4xl mx-auto space-y-6">
-                <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-                  With years of experience in the education sector and a strong network of prestigious institutions, we specialize in personalized consultation and education placement services, ensuring that every student finds the perfect academic path tailored to their interests and career goals.
-                </p>
-                <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
-                  At Fortex, we believe that quality education is the foundation of a successful future. Our approach is built on transparency, trust, and student-centric solutions, making us one of the most reliable education consultancies in India.
-                </p>
+              <div className="max-w-4xl space-y-3">
+                {/* Mobile: Show preview with read more */}
+                <div className="lg:hidden">
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    We specialize in personalized consultation and education placement services, helping students find the perfect academic path.
+                  </p>
+                  {showFullAbout && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="mt-3 space-y-3"
+                    >
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        With years of experience and a strong network of prestigious institutions, we ensure every student finds their ideal academic path tailored to their interests and career goals.
+                      </p>
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        Our approach is built on transparency, trust, and student-centric solutions, making us one of India's most reliable education consultancies.
+                      </p>
+                    </motion.div>
+                  )}
+                  <button
+                    onClick={() => setShowFullAbout(!showFullAbout)}
+                    className="text-primary-600 font-medium text-sm mt-2 inline-flex items-center hover:text-primary-700"
+                  >
+                    {showFullAbout ? 'Show less' : 'Read more'}
+                    <FaArrowRight className={`ml-1 text-xs transition-transform ${showFullAbout ? 'rotate-90' : ''}`} />
+                  </button>
+                </div>
+                {/* Desktop: Show full text */}
+                <div className="hidden lg:block space-y-4">
+                  <p className="text-base text-gray-700 leading-relaxed">
+                    With years of experience in the education sector and a strong network of prestigious institutions, we specialize in personalized consultation and education placement services, ensuring that every student finds the perfect academic path tailored to their interests and career goals.
+                  </p>
+                  <p className="text-base text-gray-700 leading-relaxed">
+                    At Fortex, we believe that quality education is the foundation of a successful future. Our approach is built on transparency, trust, and student-centric solutions, making us one of the most reliable education consultancies in India.
+                  </p>
+                </div>
               </div>
             </motion.div>
 
             {/* Vision & Mission Cards */}
-            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+            <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
-                className="card bg-white shadow-xl hover:shadow-2xl transition-shadow"
+                className="bg-white rounded-xl shadow-lg p-5 sm:p-6 lg:p-8 hover:shadow-2xl transition-shadow"
               >
-                <div className="flex items-start space-x-4 mb-6">
-                  <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                    <FaTrophy className="text-2xl text-white" />
+                <div className="flex items-start space-x-3 sm:space-x-4 mb-4 sm:mb-6">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <FaTrophy className="text-xl sm:text-2xl text-white" />
                   </div>
-                  <h3 className="font-heading font-bold text-2xl md:text-3xl text-gray-900 mt-2">
+                  <h3 className="font-heading font-bold text-xl sm:text-2xl md:text-3xl text-gray-900 mt-1 sm:mt-2">
                     Our Vision
                   </h3>
                 </div>
-                <p className="text-base md:text-lg text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed">
                   At Fortex Education Consultancy, we believe that every student in India deserves access to quality higher education. Our goal is to guide and support students in securing admission to top universities and colleges. We help them make informed decisions about their future, turning their dreams into reality.
                 </p>
               </motion.div>
@@ -295,17 +389,17 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
-                className="card bg-white shadow-xl hover:shadow-2xl transition-shadow"
+                className="bg-white rounded-xl shadow-lg p-5 sm:p-6 lg:p-8 hover:shadow-2xl transition-shadow"
               >
-                <div className="flex items-start space-x-4 mb-6">
-                  <div className="w-14 h-14 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                    <FaHeart className="text-2xl text-white" />
+                <div className="flex items-start space-x-3 sm:space-x-4 mb-4 sm:mb-6">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-secondary-500 to-secondary-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <FaHeart className="text-xl sm:text-2xl text-white" />
                   </div>
-                  <h3 className="font-heading font-bold text-2xl md:text-3xl text-gray-900 mt-2">
+                  <h3 className="font-heading font-bold text-xl sm:text-2xl md:text-3xl text-gray-900 mt-1 sm:mt-2">
                     Our Mission
                   </h3>
                 </div>
-                <p className="text-base md:text-lg text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed">
                   Our mission is to guide students in achieving their academic and career goals with honesty and dedication. We provide personalized counseling, admission support, and financial aid guidance, making the entire process smooth and stress-free. At Fortex, we don't just help students get into colleges—we help them build a strong foundation for a successful future.
                 </p>
               </motion.div>
@@ -315,16 +409,16 @@ export default function HomePage() {
       </section>
 
       {/* Services Preview Section */}
-      <section className="py-16 md:py-24 bg-gray-50">
+      <section className="py-10 sm:py-14 lg:py-20 bg-gray-50">
         <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="section-heading">Our Services</h2>
-            <p className="section-subheading">
-              Comprehensive solutions for all your educational needs
+          <div className="mb-8 lg:mb-10">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Our Services</h2>
+            <p className="text-sm sm:text-base text-gray-600">
+              Complete solutions for your education journey
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             {services.map((service, index) => (
               <motion.div
                 key={service.id}
@@ -332,41 +426,41 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="card group hover:border-primary-500 border-2 border-transparent"
+                className="bg-white rounded-xl shadow-lg p-5 sm:p-6 hover:shadow-xl transition-shadow duration-300 group hover:border-primary-500 border-2 border-transparent"
               >
-                <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
                   {service.icon === 'target' && (
-                    <FaUserTie className="text-2xl text-white" />
+                    <FaUserTie className="text-xl sm:text-2xl text-white" />
                   )}
                   {service.icon === 'graduation' && (
-                    <FaGraduationCap className="text-2xl text-white" />
+                    <FaGraduationCap className="text-xl sm:text-2xl text-white" />
                   )}
                   {service.icon === 'book' && (
-                    <FaBookOpen className="text-2xl text-white" />
+                    <FaBookOpen className="text-xl sm:text-2xl text-white" />
                   )}
                   {service.icon === 'globe' && (
-                    <FaGlobe className="text-2xl text-white" />
+                    <FaGlobe className="text-xl sm:text-2xl text-white" />
                   )}
                 </div>
-                <h3 className="font-heading font-semibold text-xl mb-3 text-gray-900">
+                <h3 className="font-heading font-semibold text-base sm:text-lg lg:text-xl mb-2 sm:mb-3 text-gray-900">
                   {service.title}
                 </h3>
-                <p className="text-gray-600 mb-4 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4 leading-relaxed line-clamp-3">
                   {service.description}
                 </p>
                 <Link
                   href={`/services#${service.id}`}
-                  className="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium"
+                  className="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium text-sm sm:text-base transition-colors"
                 >
                   Learn More
-                  <FaArrowRight className="ml-2 text-sm" />
+                  <FaArrowRight className="ml-2 text-xs sm:text-sm" />
                 </Link>
               </motion.div>
             ))}
           </div>
 
-          <div className="text-center mt-12">
-            <Link href="/services" className="btn-primary">
+          <div className="text-center mt-8 sm:mt-10 lg:mt-12">
+            <Link href="/services" className="inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 sm:px-8 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg text-sm sm:text-base">
               View All Services
             </Link>
           </div>
@@ -374,98 +468,185 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-16 md:py-24 bg-white">
+      <section className="py-10 sm:py-14 lg:py-20 bg-white">
         <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="section-heading">What Our Students Say</h2>
-            <p className="section-subheading">
-              Real experiences from students we've helped achieve their dreams
+          <div className="mb-8 lg:mb-10">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Student Success Stories</h2>
+            <p className="text-sm sm:text-base text-gray-600">
+              What our students say about us
             </p>
           </div>
 
           {loadingTestimonials ? (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary-600 border-t-transparent"></div>
-              <p className="mt-4 text-gray-600">Loading testimonials...</p>
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-primary-600 border-t-transparent"></div>
+              <p className="mt-3 text-sm text-gray-600">Loading...</p>
             </div>
           ) : testimonials.length > 0 ? (
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {testimonials.map((testimonial, index) => (
-                <motion.div
-                  key={testimonial.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className={`card bg-gradient-to-br ${index % 2 === 0 ? 'from-primary-50' : 'from-secondary-50'
-                    } to-white`}
+            <>
+              {/* Horizontal scroll on mobile */}
+              <div className="lg:hidden">
+                <div 
+                  ref={scrollContainerRef}
+                  onScroll={handleScroll}
+                  onTouchStart={handleUserInteraction}
+                  className="overflow-x-auto scrollbar-hide -mx-5 px-5 snap-x snap-mandatory"
                 >
-                  <div className="flex items-center mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <FaStar key={i} className="text-yellow-400 text-lg" />
+                  <div className="flex gap-4 pb-4">
+                    {testimonials.map((testimonial, index) => (
+                      <div
+                        key={testimonial.id}
+                        className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 hover:border-primary-200 relative overflow-hidden group flex-shrink-0 w-[85vw] max-w-[340px] snap-center"
+                      >
+                        {/* Decorative element */}
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary-100/50 to-transparent rounded-bl-full transform translate-x-6 -translate-y-6 group-hover:scale-110 transition-transform"></div>
+                        
+                        {/* Rating */}
+                        <div className="flex items-center gap-1 mb-4 relative z-10">
+                          {[...Array(testimonial.rating)].map((_, i) => (
+                            <FaStar key={i} className="text-yellow-400 text-base" />
+                          ))}
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="mb-5 relative z-10">
+                          <p className="text-gray-700 leading-relaxed text-sm line-clamp-4 italic">
+                            "{testimonial.content}"
+                          </p>
+                        </div>
+                        
+                        {/* Author info */}
+                        <div className="flex items-center gap-3 pt-4 border-t border-gray-100 relative z-10">
+                          {testimonial.imageUrl ? (
+                            <Image
+                              src={testimonial.imageUrl}
+                              alt={testimonial.name}
+                              width={44}
+                              height={44}
+                              className="w-11 h-11 rounded-full object-cover ring-2 ring-gray-100"
+                            />
+                          ) : (
+                            <div className={`w-11 h-11 ${index % 2 === 0 ? 'bg-gradient-to-br from-primary-500 to-primary-600' : 'bg-gradient-to-br from-secondary-500 to-secondary-600'} rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md`}>
+                              {getInitials(testimonial.name)}
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-gray-900 truncate">{testimonial.name}</p>
+                            <p className="text-xs text-gray-500 truncate">{testimonial.role}</p>
+                          </div>
+                        </div>
+                      </div>
                     ))}
                   </div>
-                  <p className="text-gray-700 leading-relaxed mb-6 italic break-words">
-                    "{testimonial.content}"
-                  </p>
-                  <div className="flex items-center space-x-3">
-                    {testimonial.imageUrl ? (
-                      <Image
-                        src={testimonial.imageUrl}
-                        alt={testimonial.name}
-                        width={48}
-                        height={48}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className={`w-12 h-12 ${index % 2 === 0 ? 'bg-primary-600' : 'bg-secondary-600'
-                        } rounded-full flex items-center justify-center text-white font-bold text-lg`}>
-                        {getInitials(testimonial.name)}
-                      </div>
-                    )}
-                    <div>
-                      <p className="font-semibold text-gray-900">{testimonial.name}</p>
-                      <p className="text-sm text-gray-600">{testimonial.role}</p>
+                </div>
+
+                {/* Dots navigation */}
+                <div className="flex justify-center gap-2 mt-6">
+                  {testimonials.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setActiveTestimonial(index);
+                        handleUserInteraction();
+                      }}
+                      className={`transition-all duration-300 rounded-full ${
+                        activeTestimonial === index
+                          ? 'w-8 h-2 bg-primary-600'
+                          : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'
+                      }`}
+                      aria-label={`Go to testimonial ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Grid layout on desktop */}
+              <div className="hidden lg:grid lg:grid-cols-3 gap-6">
+                {testimonials.map((testimonial, index) => (
+                  <motion.div
+                    key={testimonial.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 hover:border-primary-200 relative overflow-hidden group"
+                  >
+                    {/* Decorative element */}
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary-100/50 to-transparent rounded-bl-full transform translate-x-6 -translate-y-6 group-hover:scale-110 transition-transform"></div>
+                    
+                    {/* Rating */}
+                    <div className="flex items-center gap-1 mb-4 relative z-10">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <FaStar key={i} className="text-yellow-400 text-base" />
+                      ))}
                     </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                    
+                    {/* Content */}
+                    <div className="mb-5 relative z-10">
+                      <p className="text-gray-700 leading-relaxed text-sm line-clamp-4 italic">
+                        "{testimonial.content}"
+                      </p>
+                    </div>
+                    
+                    {/* Author info */}
+                    <div className="flex items-center gap-3 pt-4 border-t border-gray-100 relative z-10">
+                      {testimonial.imageUrl ? (
+                        <Image
+                          src={testimonial.imageUrl}
+                          alt={testimonial.name}
+                          width={44}
+                          height={44}
+                          className="w-11 h-11 rounded-full object-cover ring-2 ring-gray-100"
+                        />
+                      ) : (
+                        <div className={`w-11 h-11 ${index % 2 === 0 ? 'bg-gradient-to-br from-primary-500 to-primary-600' : 'bg-gradient-to-br from-secondary-500 to-secondary-600'} rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md`}>
+                          {getInitials(testimonial.name)}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-gray-900 truncate">{testimonial.name}</p>
+                        <p className="text-xs text-gray-500 truncate">{testimonial.role}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </>
           ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-600">No testimonials available yet.</p>
+            <div className="text-center py-8">
+              <p className="text-sm text-gray-600">No testimonials yet.</p>
             </div>
           )}
 
-          <div className="text-center mt-12">
-            <Link href="/testimonials" className="btn-primary">
-              View All Testimonials
+          <div className="text-center mt-8 lg:mt-10">
+            <Link href="/testimonials" className="inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md hover:shadow-lg text-sm">
+              View All Stories
             </Link>
           </div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 md:py-24 bg-gray-50">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-gray-50">
         <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="section-heading">Frequently Asked Questions</h2>
-            <p className="section-subheading">
+          <div className="text-center mb-8 sm:mb-10 lg:mb-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">Frequently Asked Questions</h2>
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 px-4">
               Quick answers to common questions about our services
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto space-y-4">
+          <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="card bg-white"
+              className="bg-white rounded-xl shadow-lg p-5 sm:p-6 hover:shadow-xl transition-shadow duration-300"
             >
-              <h3 className="font-heading font-semibold text-lg text-gray-900 mb-2">
+              <h3 className="font-heading font-semibold text-base sm:text-lg text-gray-900 mb-2">
                 What services does Fortex offer?
               </h3>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                 We provide personalized counseling, university selection, application assistance, scholarship guidance, and complete admission support for students across India.
               </p>
             </motion.div>
@@ -475,12 +656,12 @@ export default function HomePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="card bg-white"
+              className="bg-white rounded-xl shadow-lg p-5 sm:p-6 hover:shadow-xl transition-shadow duration-300"
             >
-              <h3 className="font-heading font-semibold text-lg text-gray-900 mb-2">
+              <h3 className="font-heading font-semibold text-base sm:text-lg text-gray-900 mb-2">
                 How do I book a counseling session?
               </h3>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                 You can book a session through our Booking page. Choose between personal one-on-one counseling or group counseling sessions for schools and colleges.
               </p>
             </motion.div>
@@ -490,12 +671,12 @@ export default function HomePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="card bg-white"
+              className="bg-white rounded-xl shadow-lg p-5 sm:p-6 hover:shadow-xl transition-shadow duration-300"
             >
-              <h3 className="font-heading font-semibold text-lg text-gray-900 mb-2">
+              <h3 className="font-heading font-semibold text-base sm:text-lg text-gray-900 mb-2">
                 Which institutions do you have partnerships with?
               </h3>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                 We partner with 40+ top institutions including Jain University, Manipal University, SRM, Christ University, PES University, and many more across India.
               </p>
             </motion.div>
@@ -505,19 +686,19 @@ export default function HomePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
-              className="card bg-white"
+              className="bg-white rounded-xl shadow-lg p-5 sm:p-6 hover:shadow-xl transition-shadow duration-300"
             >
-              <h3 className="font-heading font-semibold text-lg text-gray-900 mb-2">
+              <h3 className="font-heading font-semibold text-base sm:text-lg text-gray-900 mb-2">
                 Do you help with scholarships and financial aid?
               </h3>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                 Yes! We provide in-depth guidance on scholarships, grants, and financial aid options to help students secure funding and minimize educational expenses.
               </p>
             </motion.div>
           </div>
 
-          <div className="text-center mt-12">
-            <Link href="/faq" className="btn-secondary">
+          <div className="text-center mt-8 sm:mt-10 lg:mt-12">
+            <Link href="/faq" className="inline-flex items-center justify-center bg-secondary-600 hover:bg-secondary-700 text-white font-semibold py-3 px-6 sm:px-8 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg text-sm sm:text-base">
               View All FAQs
             </Link>
           </div>
@@ -525,26 +706,25 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-r from-primary-600 to-secondary-600 text-white">
-        <div className="container-custom text-center">
-          <h2 className="text-3xl md:text-4xl font-heading font-bold mb-6">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-r from-primary-600 to-secondary-600 text-white">
+        <div className="container-custom">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-bold mb-3 sm:mb-4">
             Ready to Start Your Journey?
           </h2>
-          <p className="text-xl mb-8 text-primary-50 max-w-2xl mx-auto">
-            Book a free consultation with our expert counselors and take the
-            first step towards your dream career.
+          <p className="text-base sm:text-lg text-primary-50 mb-6 max-w-2xl">
+            Book a free consultation and take the first step towards your dream career.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Link
               href="/booking"
-              className="inline-flex items-center justify-center bg-white text-primary-600 hover:bg-primary-50 font-semibold py-4 px-8 rounded-lg transition-all shadow-lg"
+              className="inline-flex items-center justify-center bg-white text-primary-700 hover:bg-gray-50 font-semibold py-3 px-6 rounded-lg transition-all shadow-lg text-sm"
             >
-              Book Free Consultation
-              <FaArrowRight className="ml-2" />
+              Book Consultation
+              <FaArrowRight className="ml-2 text-xs" />
             </Link>
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center border-2 border-white text-white hover:bg-white hover:text-primary-600 font-semibold py-4 px-8 rounded-lg transition-all"
+              className="inline-flex items-center justify-center border-2 border-white text-white hover:bg-white/10 font-medium py-3 px-6 rounded-lg transition-all text-sm"
             >
               Contact Us
             </Link>
