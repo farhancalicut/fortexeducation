@@ -36,7 +36,6 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         sessionStorage.setItem('admin_auth', 'true');
         return true;
       } catch (error) {
-        console.error("Firebase auth error:", error);
         return false;
       }
     }
@@ -47,7 +46,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     try {
       await signOut(auth);
     } catch (error) {
-      console.error("Error signing out:", error);
+      // Error signing out
     }
     setIsAuthenticated(false);
     sessionStorage.removeItem('admin_auth');

@@ -55,7 +55,6 @@ export default function TestimonialsPage() {
       toast.success('Thank you for your testimonial! It will be reviewed and published soon.');
       reset();
     } catch (error) {
-      console.error('Error submitting testimonial:', error);
       toast.error('Failed to submit testimonial. Please try again.');
     } finally {
       setIsSubmitting(false);

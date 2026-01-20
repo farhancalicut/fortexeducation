@@ -11,10 +11,11 @@ export default function AdminLogin() {
   const { login } = useAdmin();
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (login(password)) {
+    const success = await login(password);
+    if (success) {
       toast.success('Login successful!');
       router.push('/admin/dashboard');
     } else {
@@ -62,10 +63,6 @@ export default function AdminLogin() {
               Login to Dashboard
             </button>
           </form>
-
-          <p className="text-xs text-gray-500 text-center mt-6">
-            Default password: admin123 (Change in .env file)
-          </p>
         </div>
       </div>
     </div>

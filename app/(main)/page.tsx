@@ -78,7 +78,7 @@ export default function HomePage() {
 
       setTestimonials(testimonialsData);
     } catch (error) {
-      console.error('Error fetching testimonials:', error);
+      // Error fetching testimonials
     } finally {
       setLoadingTestimonials(false);
     }

@@ -46,7 +46,6 @@ export default function BookingPage() {
       );
       reset();
     } catch (error) {
-      console.error('Error submitting booking:', error);
       toast.error('Failed to submit booking. Please try again.');
     } finally {
       setIsSubmitting(false);

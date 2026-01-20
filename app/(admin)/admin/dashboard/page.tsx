@@ -67,7 +67,6 @@ export default function AdminDashboard() {
       })) as ContactForm[];
       setContacts(contactsData);
     } catch (error) {
-      console.error('Error fetching data:', error);
       toast.error('Failed to load data');
     } finally {
       setLoading(false);
