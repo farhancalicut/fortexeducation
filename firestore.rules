@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Bookings - anyone can submit, no one can read (only admin dashboard)
+    match /bookings/{document} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
+    
+    // Contact Forms - anyone can submit, no one can read (only admin dashboard)
+    match /contactForms/{document} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
+    
+    // Testimonials - anyone can submit, only approved ones can be read publicly
+    match /testimonials/{document} {
+      allow create: if true;
+      allow read: if resource.data.approved == true;
+      allow update, delete: if false;
+    }
+    
+    // Block everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
