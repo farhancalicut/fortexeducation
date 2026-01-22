@@ -103,7 +103,7 @@ export default function TestimonialsPage() {
               <div className="inline-block w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {testimonials.map((testimonial, index) => (
                 <motion.div
                   key={testimonial.id}
@@ -111,16 +111,17 @@ export default function TestimonialsPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="card relative"
+                  className="card relative overflow-hidden"
+                  style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
                 >
-                  <FaQuoteLeft className="text-4xl text-primary-200 absolute top-4 right-4" />
+                  <FaQuoteLeft className="text-3xl sm:text-4xl text-primary-200 absolute top-4 right-4 flex-shrink-0" />
                   <div className="mb-4">{renderStars(testimonial.rating)}</div>
-                  <p className="text-gray-700 leading-relaxed mb-6 italic break-words">
+                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed mb-6 italic" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                     "{testimonial.content}"
                   </p>
-                  <div>
-                    <p className="font-semibold text-gray-900">{testimonial.name}</p>
-                    <p className="text-sm text-gray-600">{testimonial.role}</p>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-gray-900 text-sm sm:text-base" style={{ wordBreak: 'break-word' }}>{testimonial.name}</p>
+                    <p className="text-xs sm:text-sm text-gray-600" style={{ wordBreak: 'break-word' }}>{testimonial.role}</p>
                   </div>
                 </motion.div>
               ))}
