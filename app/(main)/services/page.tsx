@@ -24,21 +24,78 @@ export default function ServicesPage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-600 to-secondary-600 text-white py-16 md:py-24">
-        <div className="container-custom">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto"
-          >
-            <h1 className="text-4xl md:text-5xl font-heading font-bold mb-6">
-              Our Services
-            </h1>
-            <p className="text-xl text-primary-50 leading-relaxed">
-              Comprehensive educational consulting services to make higher education in India accessible, stress-free, and rewarding
-            </p>
-          </motion.div>
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pt-14 pb-6 md:pt-32 md:pb-20">
+        {/* Decorative Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary-200/30 rounded-full blur-3xl" />
+          <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-purple-200/30 rounded-full blur-3xl" />
+        </div>
+
+        <div className="container-custom relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Content */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="inline-flex items-center space-x-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm mb-6">
+                <FaCheckCircle className="text-primary-600" />
+                <span className="text-sm font-medium text-gray-700">What We Offer</span>
+              </div>
+              
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold mb-2 bg-gradient-to-r from-primary-700 via-primary-600 to-purple-700 bg-clip-text text-transparent leading-tight">
+                Our Services
+              </h1>
+              
+              <p className="text-sm md:text-xl text-gray-600 leading-relaxed mb-8">
+                Comprehensive educational consulting services to make higher education in India accessible, stress-free, and rewarding
+              </p>
+
+              {/* <div className="flex flex-wrap gap-3">
+                <div className="px-4 py-2 bg-white rounded-full shadow-sm">
+                  <span className="text-sm font-medium text-gray-700">🎯 Career Counseling</span>
+                </div>
+                <div className="px-4 py-2 bg-white rounded-full shadow-sm">
+                  <span className="text-sm font-medium text-gray-700">📚 Admission Support</span>
+                </div>
+                <div className="px-4 py-2 bg-white rounded-full shadow-sm">
+                  <span className="text-sm font-medium text-gray-700">💰 Financial Aid</span>
+                </div>
+              </div> */}
+            </motion.div>
+
+            {/* Illustration Cards */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="hidden lg:block"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { Icon: FaUserTie, title: 'Career Counseling', color: 'from-blue-500 to-cyan-500', desc: 'Expert guidance' },
+                  { Icon: FaGraduationCap, title: 'Admission Support', color: 'from-purple-500 to-indigo-500', desc: 'End-to-end help' },
+                  { Icon: FaBookOpen, title: 'Test Preparation', color: 'from-orange-500 to-amber-500', desc: 'Ace your exams' },
+                  { Icon: FaGlobe, title: 'Beyond Academics', color: 'from-pink-500 to-rose-500', desc: 'Holistic support' },
+                ].map((item, index) => (
+                  <motion.div
+                    key={item.title}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.4 + index * 0.1 }}
+                    className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all"
+                  >
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white text-xl mb-3`}>
+                      <item.Icon />
+                    </div>
+                    <h3 className="font-semibold text-gray-800 text-sm mb-1">{item.title}</h3>
+                    <p className="text-xs text-gray-500">{item.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 

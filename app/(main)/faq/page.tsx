@@ -106,18 +106,30 @@ export default function FAQPage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-600 to-secondary-600 text-white py-16 md:py-24">
-        <div className="container-custom">
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pt-10 pb-10 md:pt-32 md:pb-20">
+        {/* Decorative Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary-200/30 rounded-full blur-3xl" />
+          <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-purple-200/30 rounded-full blur-3xl" />
+        </div>
+
+        <div className="container-custom relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <h1 className="text-4xl md:text-5xl font-heading font-bold mb-6">
+            <div className="inline-flex items-center space-x-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm mb-6">
+              <FaChevronDown className="text-primary-600" />
+              <span className="text-sm font-medium text-gray-700">Help Center</span>
+            </div>
+            
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold mb-6 bg-gradient-to-r from-primary-700 via-primary-600 to-purple-700 bg-clip-text text-transparent leading-tight">
               Frequently Asked Questions
             </h1>
-            <p className="text-xl text-primary-50 leading-relaxed">
+            
+            <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
               Find answers to common questions about our services and processes
             </p>
           </motion.div>
@@ -125,10 +137,10 @@ export default function FAQPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 md:py-24">
+      <section className="py-6 md:py-24">
         <div className="container-custom max-w-4xl">
           {/* Category Filter */}
-          <div className="flex flex-wrap gap-3 mb-12 justify-center">
+          {/* <div className="flex flex-wrap gap-3 mb-10 justify-center">
             {categories.map((category) => (
               <button
                 key={category}
@@ -142,7 +154,7 @@ export default function FAQPage() {
                 {category}
               </button>
             ))}
-          </div>
+          </div> */}
 
           {/* FAQ Accordion */}
           <div className="space-y-4">

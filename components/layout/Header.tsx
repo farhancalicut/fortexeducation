@@ -35,11 +35,12 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      className={`fixed top-0 left-0 right-0 transition-all duration-500 ${
         isScrolled 
-          ? 'bg-white/98 backdrop-blur-lg shadow-2xl border-b border-gray-100/50' 
+          ? 'bg-white shadow-2xl border-b border-gray-200' 
           : 'bg-white shadow-lg'
       }`}
+      style={{ zIndex: 10000 }}
     >
       {/* Top Bar - Hidden on mobile */}
       <div className="hidden md:block bg-gradient-to-r from-primary-600 via-primary-500 to-purple-600 text-white text-sm">
@@ -69,34 +70,32 @@ export default function Header() {
       </div>
 
       {/* Main Navigation */}
-      <nav className={`container-custom transition-all duration-500 ${isScrolled ? 'py-2.5 lg:py-3' : 'py-4 lg:py-4'}`}>
+      <nav className={`container-custom transition-all duration-500 ${isScrolled ? 'py-2 lg:py-2.5' : 'py-3 lg:py-4'}`}>
         <div className="flex items-center justify-between">
           {/* Modern Logo Design */}
-          <Link href="/" className="flex items-center space-x-3 lg:space-x-4 group">
-            <div className={`relative transition-all duration-500 ${isScrolled ? 'scale-90 lg:scale-95' : 'scale-100'}`}>
+          <Link href="/" className="flex items-center space-x-2 lg:space-x-3 group">
+            <div className={`relative transition-all duration-500 ${isScrolled ? 'scale-90' : 'scale-100'}`}>
               {/* Gradient glow effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-primary-400/30 via-purple-400/30 to-primary-400/30 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-              <div className={`relative bg-gradient-to-br from-primary-50 to-purple-50 rounded-2xl p-2 transition-all duration-300 ${
-                isScrolled ? 'shadow-lg' : 'shadow-md'
+              <div className={`relative bg-gradient-to-br from-primary-50 to-purple-50 rounded-xl p-1.5 transition-all duration-300 ${
+                isScrolled ? 'shadow-md' : 'shadow-sm'
               }`}>
                 <Image
                   src="/logo.png"
                   alt="FORTEX Logo"
-                  width={isScrolled ? 36 : 42}
-                  height={isScrolled ? 36 : 42}
+                  width={isScrolled ? 32 : 38}
+                  height={isScrolled ? 32 : 38}
                   className="object-contain transition-all duration-500"
                 />
               </div>
             </div>
             <div className="flex flex-col justify-center">
               <span className={`font-heading font-extrabold tracking-tight transition-all duration-500 bg-gradient-to-r from-primary-700 via-primary-600 to-purple-700 bg-clip-text text-transparent ${
-                isScrolled ? 'text-lg lg:text-xl' : 'text-xl lg:text-2xl'
+                isScrolled ? 'text-base lg:text-xl' : 'text-lg lg:text-2xl'
               }`}>
                 FORTEX
               </span>
-              <span className={`text-xs font-medium text-gray-600 -mt-0.5 transition-all duration-500 ${
-                isScrolled ? 'opacity-0 h-0 overflow-hidden lg:opacity-100 lg:h-auto' : 'opacity-100'
-              }`}>
+              <span className="text-xs font-medium text-gray-600 -mt-0.5">
                 For Defining Future
               </span>
             </div>
@@ -130,27 +129,27 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Ultra-Modern Mobile Menu Button */}
+          {/* Mobile Menu Button */}
           <button
             onClick={toggleMenu}
-            className={`lg:hidden relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-500 group ${
+            className={`lg:hidden relative w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 ${
               isMenuOpen 
-                ? 'bg-gradient-to-br from-primary-600 via-primary-500 to-purple-600 shadow-xl shadow-primary-600/30 scale-95' 
+                ? 'bg-gradient-to-br from-primary-600 to-purple-600' 
                 : isScrolled
-                ? 'bg-gradient-to-br from-gray-100 to-gray-50 hover:from-primary-50 hover:to-purple-50 shadow-md'
-                : 'bg-gradient-to-br from-gray-50 to-gray-100 hover:from-primary-50 hover:to-purple-50 shadow-lg'
+                ? 'bg-gray-100 hover:bg-primary-50'
+                : 'bg-gray-50 hover:bg-primary-50'
             }`}
             aria-label="Toggle menu"
           >
-            <div className="flex flex-col items-center justify-center gap-1.5 w-6 h-6">
+            <div className="flex flex-col items-center justify-center gap-1.5 w-5 h-5">
               <span className={`block h-0.5 rounded-full transition-all duration-300 ${
-                isMenuOpen ? 'bg-white w-5 rotate-45 translate-y-2' : 'bg-gray-700 group-hover:bg-primary-600 w-6'
+                isMenuOpen ? 'bg-white w-4 rotate-45 translate-y-2' : 'bg-gray-700 w-5'
               }`}></span>
               <span className={`block h-0.5 rounded-full transition-all duration-300 ${
-                isMenuOpen ? 'bg-white w-0 opacity-0' : 'bg-gray-700 group-hover:bg-primary-600 w-5'
+                isMenuOpen ? 'bg-white w-0 opacity-0' : 'bg-gray-700 w-4'
               }`}></span>
               <span className={`block h-0.5 rounded-full transition-all duration-300 ${
-                isMenuOpen ? 'bg-white w-5 -rotate-45 -translate-y-2' : 'bg-gray-700 group-hover:bg-primary-600 w-4'
+                isMenuOpen ? 'bg-white w-4 -rotate-45 -translate-y-2' : 'bg-gray-700 w-3.5'
               }`}></span>
             </div>
           </button>
@@ -159,9 +158,14 @@ export default function Header() {
 
       {/* Mobile Menu - Slide from Right */}
       <div 
-        className={`lg:hidden fixed inset-0 top-[64px] bg-white z-40 transition-transform duration-300 ease-out ${
+        className={`lg:hidden fixed inset-0 bg-white shadow-2xl transition-transform duration-300 ease-out ${
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
+        style={{ 
+          top: isScrolled ? '56px' : '64px',
+          zIndex: 9999,
+          height: isScrolled ? 'calc(100vh - 56px)' : 'calc(100vh - 64px)'
+        }}
       >
         <div className="h-full overflow-y-auto">
           <ul className="py-2">

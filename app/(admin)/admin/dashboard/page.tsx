@@ -17,6 +17,8 @@ import {
   FaCheckCircle,
   FaTimes,
   FaEye,
+  FaPhone,
+  FaWhatsapp,
 } from 'react-icons/fa';
 import type { Booking, Testimonial, ContactForm } from '@/types';
 
@@ -46,11 +48,8 @@ export default function AdminDashboard() {
       })) as Booking[];
       setBookings(bookingsData);
 
-      // Fetch Testimonials (pending approval)
-      const testimonialsQuery = query(
-        collection(db, 'testimonials'),
-        where('approved', '==', false)
-      );
+      // Fetch All Testimonials
+      const testimonialsQuery = query(collection(db, 'testimonials'));
       const testimonialsSnapshot = await getDocs(testimonialsQuery);
       const testimonialsData = testimonialsSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -73,16 +72,6 @@ export default function AdminDashboard() {
     }
   };
 
-  const updateBookingStatus = async (bookingId: string, status: 'confirmed' | 'cancelled') => {
-    try {
-      await updateDoc(doc(db, 'bookings', bookingId), { status });
-      setBookings(bookings.map((b) => (b.id === bookingId ? { ...b, status } : b)));
-      toast.success(`Booking ${status}`);
-    } catch (error) {
-      toast.error('Failed to update booking');
-    }
-  };
-
   const approveTestimonial = async (testimonialId: string, approved: boolean) => {
     try {
       await updateDoc(doc(db, 'testimonials', testimonialId), { approved });
@@ -101,70 +90,60 @@ export default function AdminDashboard() {
   const stats = [
     {
       icon: FaCalendar,
-      label: 'Pending Bookings',
-      value: bookings.filter((b) => b.status === 'pending').length,
+      label: 'Total Bookings',
+      value: bookings.length,
       color: 'bg-blue-100 text-blue-600',
     },
     {
       icon: FaComments,
-      label: 'Pending Testimonials',
+      label: 'Total Testimonials',
       value: testimonials.length,
       color: 'bg-yellow-100 text-yellow-600',
     },
-    {
-      icon: FaEnvelope,
-      label: 'New Messages',
-      value: contacts.filter((c) => c.status === 'new').length,
-      color: 'bg-green-100 text-green-600',
-    },
-    {
-      icon: FaBookOpen,
-      label: 'Total Bookings',
-      value: bookings.length,
-      color: 'bg-purple-100 text-purple-600',
-    },
+    
   ];
 
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-heading font-bold text-gray-900">
+              <h1 className="text-lg sm:text-2xl font-heading font-bold text-gray-900">
                 Admin Dashboard
               </h1>
-              <p className="text-sm text-gray-600">Manage your website content</p>
+              <p className="text-xs sm:text-sm text-gray-600">Manage your website content</p>
             </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/" className="text-gray-600 hover:text-primary-600">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <Link href="/" className="text-sm text-gray-600 hover:text-primary-600">
                 View Site
               </Link>
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-2 text-gray-600 hover:text-red-600 transition-colors"
+                className="flex items-center space-x-2 text-sm text-gray-600 hover:text-red-600 transition-colors"
               >
-                <FaSignOutAlt />
-                <span>Logout</span>
+                <FaSignOutAlt className="text-sm" />
+                <span className="hidden sm:inline">Logout</span>
+                <span className="sm:hidden">Exit</span>
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Stats Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           {stats.map((stat, index) => (
-            <div key={index} className="card">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
-                  <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+            <div key={index} className="card p-3 sm:p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1 truncate">{stat.label}</p>
+                  <p className="text-xl sm:text-3xl font-bold text-gray-900">{stat.value}</p>
                 </div>
-                <div className={`w-14 h-14 ${stat.color} rounded-lg flex items-center justify-center`}>
-                  <stat.icon className="text-2xl" />
+                <div className={`w-10 h-10 sm:w-14 sm:h-14 ${stat.color} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                  <stat.icon className="text-lg sm:text-2xl" />
                 </div>
               </div>
             </div>
@@ -174,10 +153,10 @@ export default function AdminDashboard() {
         {/* Tabs */}
         <div className="bg-white rounded-xl shadow-sm mb-6">
           <div className="border-b border-gray-200">
-            <div className="flex space-x-1 p-4">
+            <div className="flex space-x-1 sm:space-x-2 p-2 sm:p-4 overflow-x-auto scrollbar-hide">
               <button
                 onClick={() => setActiveTab('bookings')}
-                className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                className={`px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-base font-medium transition-colors whitespace-nowrap ${
                   activeTab === 'bookings'
                     ? 'bg-primary-600 text-white'
                     : 'text-gray-600 hover:bg-gray-100'
@@ -187,7 +166,7 @@ export default function AdminDashboard() {
               </button>
               <button
                 onClick={() => setActiveTab('testimonials')}
-                className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                className={`px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-base font-medium transition-colors whitespace-nowrap ${
                   activeTab === 'testimonials'
                     ? 'bg-primary-600 text-white'
                     : 'text-gray-600 hover:bg-gray-100'
@@ -197,7 +176,7 @@ export default function AdminDashboard() {
               </button>
               <button
                 onClick={() => setActiveTab('contacts')}
-                className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                className={`px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-base font-medium transition-colors whitespace-nowrap ${
                   activeTab === 'contacts'
                     ? 'bg-primary-600 text-white'
                     : 'text-gray-600 hover:bg-gray-100'
@@ -208,7 +187,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-3 sm:p-6">
             {loading ? (
               <div className="text-center py-12">
                 <div className="inline-block w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
@@ -217,108 +196,171 @@ export default function AdminDashboard() {
               <>
                 {/* Bookings Tab */}
                 {activeTab === 'bookings' && (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Name</th>
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Type</th>
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Date & Time</th>
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Contact</th>
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {bookings.map((booking) => (
-                          <tr key={booking.id}>
-                            <td className="px-4 py-4 text-sm">{booking.name}</td>
-                            <td className="px-4 py-4 text-sm">
-                              <span className={`px-2 py-1 rounded-full text-xs ${
+                  <>
+                    {/* Desktop View */}
+                    <div className="hidden md:block space-y-3">
+                      {bookings.map((booking) => (
+                        <div key={booking.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                          <div className="bg-gray-50 px-4 py-3 flex items-center justify-between">
+                            <div className="flex items-center gap-4 flex-1">
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                                 booking.type === 'personal'
                                   ? 'bg-blue-100 text-blue-700'
                                   : 'bg-green-100 text-green-700'
                               }`}>
                                 {booking.type}
                               </span>
-                            </td>
-                            <td className="px-4 py-4 text-sm">
-                              {booking.date} at {booking.time}
-                            </td>
-                            <td className="px-4 py-4 text-sm">
-                              {booking.email}<br />
-                              {booking.phone}
-                            </td>
-                            <td className="px-4 py-4 text-sm">
-                              <span className={`px-2 py-1 rounded-full text-xs ${
-                                booking.status === 'pending'
-                                  ? 'bg-yellow-100 text-yellow-700'
-                                  : booking.status === 'confirmed'
-                                  ? 'bg-green-100 text-green-700'
-                                  : 'bg-red-100 text-red-700'
-                              }`}>
-                                {booking.status}
-                              </span>
-                            </td>
-                            <td className="px-4 py-4 text-sm">
-                              {booking.status === 'pending' && (
-                                <div className="flex space-x-2">
-                                  <button
-                                    onClick={() => updateBookingStatus(booking.id!, 'confirmed')}
-                                    className="text-green-600 hover:text-green-700"
-                                    title="Confirm"
-                                  >
-                                    <FaCheckCircle size={20} />
-                                  </button>
-                                  <button
-                                    onClick={() => updateBookingStatus(booking.id!, 'cancelled')}
-                                    className="text-red-600 hover:text-red-700"
-                                    title="Cancel"
-                                  >
-                                    <FaTimes size={20} />
-                                  </button>
+                              <div>
+                                <h3 className="font-semibold text-gray-900">{booking.name}</h3>
+                                <p className="text-sm text-gray-600">{booking.date} at {booking.time}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <a
+                                href={`tel:${booking.phone}`}
+                                className="inline-flex items-center justify-center w-8 h-8 bg-primary-600 hover:bg-primary-700 text-white rounded-full transition-colors"
+                                title={`Call ${booking.name}`}
+                              >
+                                <FaPhone className="text-sm" />
+                              </a>
+                              <a
+                                href={`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center w-8 h-8 bg-green-600 hover:bg-green-700 text-white rounded-full transition-colors"
+                                title={`WhatsApp ${booking.name}`}
+                              >
+                                <FaWhatsapp className="text-sm" />
+                              </a>
+                            </div>
+                          </div>
+                          <div className="px-4 py-3 bg-white">
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <p className="text-gray-500 mb-1">Email</p>
+                                <p className="text-gray-900 break-all">{booking.email}</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-500 mb-1">Phone</p>
+                                <p className="text-gray-900">{booking.phone}</p>
+                              </div>
+                              {booking.type === 'group' && (
+                                <>
+                                  <div>
+                                    <p className="text-gray-500 mb-1">Institution</p>
+                                    <p className="text-gray-900">{booking.institution || 'N/A'}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-gray-500 mb-1">Number of Students</p>
+                                    <p className="text-gray-900">{booking.numberOfStudents || 'N/A'}</p>
+                                  </div>
+                                  <div className="col-span-2">
+                                    <p className="text-gray-500 mb-1">Institution Address</p>
+                                    <p className="text-gray-900">{booking.institutionAddress || 'N/A'}</p>
+                                  </div>
+                                </>
+                              )}
+                              {booking.message && (
+                                <div className="col-span-2">
+                                  <p className="text-gray-500 mb-1">Additional Message</p>
+                                  <p className="text-gray-900 whitespace-pre-wrap">{booking.message}</p>
                                 </div>
                               )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Mobile Cards */}
+                    <div className="md:hidden space-y-3">
+                      {bookings.map((booking) => (
+                        <div key={booking.id} className="border border-gray-200 rounded-lg p-3">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-sm">{booking.name}</h3>
+                              <p className="text-xs text-gray-600 mt-1">📅 {booking.date} at {booking.time}</p>
+                            </div>
+                            <span className={`px-2 py-1 rounded-full text-xs whitespace-nowrap ml-2 ${
+                              booking.type === 'personal'
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-green-100 text-green-700'
+                            }`}>
+                              {booking.type}
+                            </span>
+                          </div>
+                          <div className="space-y-2 text-xs mb-3">
+                            <div>
+                              <p className="text-gray-500">Email</p>
+                              <p className="text-gray-900 break-all">{booking.email}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500">Phone</p>
+                              <p className="text-gray-900">{booking.phone}</p>
+                            </div>
+                            {booking.type === 'group' && (
+                              <>
+                                <div>
+                                  <p className="text-gray-500">Institution</p>
+                                  <p className="text-gray-900">{booking.institution || 'N/A'}</p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-500">Number of Students</p>
+                                  <p className="text-gray-900">{booking.numberOfStudents || 'N/A'}</p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-500">Institution Address</p>
+                                  <p className="text-gray-900">{booking.institutionAddress || 'N/A'}</p>
+                                </div>
+                              </>
+                            )}
+                            {booking.message && (
+                              <div>
+                                <p className="text-gray-500">Message</p>
+                                <p className="text-gray-900 whitespace-pre-wrap">{booking.message}</p>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
+                            <a
+                              href={`tel:${booking.phone}`}
+                              className="inline-flex items-center justify-center w-7 h-7 bg-primary-600 hover:bg-primary-700 text-white rounded-full transition-colors"
+                              title={`Call ${booking.name}`}
+                            >
+                              <FaPhone className="text-xs" />
+                            </a>
+                            <a
+                              href={`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center justify-center w-7 h-7 bg-green-600 hover:bg-green-700 text-white rounded-full transition-colors"
+                              title={`WhatsApp ${booking.name}`}
+                            >
+                              <FaWhatsapp className="text-xs" />
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 )}
 
                 {/* Testimonials Tab */}
                 {activeTab === 'testimonials' && (
-                  <div className="grid gap-6">
+                  <div className="grid gap-3 sm:gap-6">
                     {testimonials.length === 0 ? (
-                      <p className="text-center text-gray-600 py-12">
-                        No pending testimonials
+                      <p className="text-center text-gray-600 py-12 text-sm">
+                        No testimonials yet
                       </p>
                     ) : (
                       testimonials.map((testimonial) => (
-                        <div key={testimonial.id} className="border border-gray-200 rounded-lg p-4 overflow-hidden">
-                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-lg">{testimonial.name}</h3>
-                              <p className="text-sm text-gray-600">{testimonial.role}</p>
-                            </div>
-                            <div className="flex gap-2 flex-shrink-0 self-start">
-                              <button
-                                onClick={() => approveTestimonial(testimonial.id!, true)}
-                                className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-medium whitespace-nowrap"
-                              >
-                                ✓ Approve
-                              </button>
-                              <button
-                                onClick={() => approveTestimonial(testimonial.id!, false)}
-                                className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-medium whitespace-nowrap"
-                              >
-                                ✗ Reject
-                              </button>
-                            </div>
+                        <div key={testimonial.id} className="border border-gray-200 rounded-lg p-3 sm:p-4 overflow-hidden">
+                          <div className="mb-3">
+                            <h3 className="font-semibold text-sm sm:text-lg break-words">{testimonial.name}</h3>
+                            <p className="text-xs sm:text-sm text-gray-600 break-words">{testimonial.role}</p>
                           </div>
-                          <p className="text-gray-700 italic break-words whitespace-pre-wrap">"{testimonial.content}"</p>
-                          <p className="text-sm text-gray-500 mt-2">Rating: {testimonial.rating}/5</p>
+                          <p className="text-xs sm:text-sm text-gray-700 italic break-words whitespace-pre-wrap line-clamp-4">"{testimonial.content}"</p>
+                          <p className="text-xs sm:text-sm text-gray-500 mt-2">Rating: {testimonial.rating}/5</p>
                         </div>
                       ))
                     )}
@@ -327,15 +369,15 @@ export default function AdminDashboard() {
 
                 {/* Contacts Tab */}
                 {activeTab === 'contacts' && (
-                  <div className="grid gap-6">
+                  <div className="grid gap-3 sm:gap-6">
                     {contacts.map((contact) => (
-                      <div key={contact.id} className="border border-gray-200 rounded-lg p-6">
-                        <div className="flex justify-between items-start mb-4">
-                          <div>
-                            <h3 className="font-semibold text-lg">{contact.name}</h3>
-                            <p className="text-sm text-gray-600">{contact.phone}</p>
+                      <div key={contact.id} className="border border-gray-200 rounded-lg p-3 sm:p-6">
+                        <div className="flex justify-between items-start gap-2 mb-3 sm:mb-4">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm sm:text-lg break-words">{contact.name}</h3>
+                            <p className="text-xs sm:text-sm text-gray-600 break-all">{contact.phone}</p>
                           </div>
-                          <span className={`px-3 py-1 rounded-full text-xs ${
+                          <span className={`px-2 sm:px-3 py-1 rounded-full text-xs whitespace-nowrap flex-shrink-0 ${
                             contact.status === 'new'
                               ? 'bg-blue-100 text-blue-700'
                               : 'bg-gray-100 text-gray-700'
@@ -343,8 +385,8 @@ export default function AdminDashboard() {
                             {contact.status}
                           </span>
                         </div>
-                        <h4 className="font-medium text-gray-900 mb-2">{contact.subject}</h4>
-                        <p className="text-gray-700">{contact.message}</p>
+                        <h4 className="font-medium text-gray-900 mb-2 text-sm sm:text-base break-words">{contact.subject}</h4>
+                        <p className="text-xs sm:text-sm text-gray-700 break-words whitespace-pre-wrap">{contact.message}</p>
                       </div>
                     ))}
                   </div>

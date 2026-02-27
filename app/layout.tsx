@@ -89,6 +89,7 @@ export default function RootLayout({
             style: {
               background: '#333',
               color: '#fff',
+              zIndex: 10001,
             },
             success: {
               iconTheme: {
