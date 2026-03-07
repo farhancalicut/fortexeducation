@@ -6,8 +6,7 @@ import { siteConfig, navigationLinks } from '@/lib/config';
 import {
   FaFacebook,
   FaInstagram,
-  FaLinkedin,
-  FaTwitter,
+  FaWhatsapp,
   FaPhone,
   FaEnvelope,
   FaMapMarkerAlt,
@@ -81,22 +80,13 @@ export default function Footer() {
                 <FaInstagram size={18} />
               </a>
               <a
-                href={siteConfig.links.linkedin}
+                href={siteConfig.links.whatsapp}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors"
-                aria-label="LinkedIn"
+                aria-label="WhatsApp"
               >
-                <FaLinkedin size={18} />
-              </a>
-              <a
-                href={siteConfig.links.twitter}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors"
-                aria-label="Twitter"
-              >
-                <FaTwitter size={18} />
+                <FaWhatsapp size={18} />
               </a>
             </div>
           </div>

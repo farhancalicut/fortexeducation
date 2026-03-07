@@ -12,8 +12,7 @@ import {
   FaMapMarkerAlt,
   FaFacebook,
   FaInstagram,
-  FaLinkedin,
-  FaTwitter,
+  FaWhatsapp,
   FaClock,
 } from 'react-icons/fa';
 import { siteConfig } from '@/lib/config';
@@ -70,16 +69,16 @@ export default function ContactPage() {
               <FaEnvelope className="text-primary-600" />
               <span className="text-sm font-medium text-gray-700">Contact Us</span>
             </div>
-            
+
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold mb-3 bg-gradient-to-r from-primary-700 via-primary-600 to-purple-700 bg-clip-text text-transparent leading-tight">
               Get in Touch
             </h1>
-            
+
             <p className="text-base md:text-xl text-gray-600 leading-snug mb-8">
               We're here to help you achieve your academic goals. Reach out to us for any queries or assistance.
             </p>
 
-            
+
           </motion.div>
         </div>
       </section>
@@ -188,20 +187,12 @@ export default function ContactPage() {
                     <FaInstagram size={20} />
                   </a>
                   <a
-                    href={siteConfig.links.linkedin}
+                    href={siteConfig.links.whatsapp}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-12 h-12 bg-gray-100 hover:bg-primary-600 hover:text-white rounded-lg flex items-center justify-center transition-colors"
                   >
-                    <FaLinkedin size={20} />
-                  </a>
-                  <a
-                    href={siteConfig.links.twitter}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-12 h-12 bg-gray-100 hover:bg-primary-600 hover:text-white rounded-lg flex items-center justify-center transition-colors"
-                  >
-                    <FaTwitter size={20} />
+                    <FaWhatsapp size={20} />
                   </a>
                 </div>
               </div>

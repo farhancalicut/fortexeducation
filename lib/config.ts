@@ -5,10 +5,9 @@ export const siteConfig = {
   url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
   ogImage: '/og-image.jpg',
   links: {
-    facebook: 'https://facebook.com/fortexedu',
+    facebook: 'https://www.facebook.com/share/1CM6PyuWKX/',
     instagram: 'https://instagram.com/fortexedu',
-    linkedin: 'https://linkedin.com/company/fortexedu',
-    twitter: 'https://twitter.com/fortexedu',
+    whatsapp: 'https://wa.me/918547758517',
   },
   contact: {
     email: 'info@fortexedu.com',
